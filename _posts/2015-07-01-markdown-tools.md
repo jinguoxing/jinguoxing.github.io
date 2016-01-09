@@ -15,9 +15,7 @@ description: "介绍一些不同平台下Markdown的工具"
 
 你只需要学习几个简单的符号，然后专注于码字，文字的排版只是多打几个符号而已。
 站长 @riku 整理的 Markdown 语法说明:
-<a target="_blank"  href="http://wowubuntu.com/markdown/">完整语法说明</a>
-和
-<a target="_blank"  href="http://wowubuntu.com/markdown/basic.html">快速入门</a>
+<a target="_blank"  href="http://wowubuntu.com/markdown/">完整语法说明</a>和<a target="_blank"  href="http://wowubuntu.com/markdown/basic.html">快速入门</a>
 
 <strong>Markdown 工具</strong>
 <ul>

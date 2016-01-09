@@ -8,6 +8,9 @@ tags:
     -jekyll
 ---
 
+####rake的安装
+`sudo gem install rake`
+
 ####page或post的创建及发布
 创建post文章
 
