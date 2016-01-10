@@ -1,5 +1,5 @@
 # Site settings
-title: 静中细思的博客
+title: 静中细思
 SEOTitle: 静中细思的博客 | Kingnet Blog
 header-img: img/home-bg-o.jpg
 email: 49472873@qq.com
@@ -7,7 +7,6 @@ description: "古今亿百年无有穷期,人生其间,数十寒暑,仅须臾耳
 keyword: ""
 url: "http://jinguoxing.github.io"              # your host, for absolute URL
 baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
-
 gems: ['jekyll-paginate']
 
 
@@ -33,11 +32,12 @@ anchorjs: true                          # if you want to customize anchor. check
 # replace redcarpet to kramdown,
 # although redcarpet can auto highlight code, the lack of header-id make the catalog impossible, so I switch to kramdown
 # document: http://jekyllrb.com/docs/configuration/#kramdown
-markdown: kramdown
-kramdown:
-  input: GFM                            # use Github Flavored Markdown !important
-
-
+markdown: redcarpet
+#redcarpet:
+#  input: GFM                            # use Github Flavored Markdown !important
+redcarpet:
+   extensions: [ "hard_wrap", "autolink", "tables", "strikethrough", "superscript", "with_toc_data", "highlight", "prettify", "no_intra_emphasis"]
+#highlight: true
 
 # Disqus settings
 #disqus_username: _your_disqus_short_name_

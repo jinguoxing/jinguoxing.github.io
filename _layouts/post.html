@@ -29,7 +29,7 @@ layout: default
                     {% comment %} if page.subtitle {% endcomment %}
                     <h2 class="subheading">{{ page.subtitle }}</h2>
                     {% comment %} endif {% endcomment %}
-                    <span class="meta">{{ page.date | date: "%Y年%m月%d日" }} 由 {% if page.author %}{{ page.author }}发表{% else %}{{ site.title }}{% endif %}  </span>
+                    <span class="meta">{{ page.date | date: "%Y年%m月%d日" }}  {% if page.author %}{{ page.author }}发表{% else %}{{ site.title }}{% endif %}  </span>
                 </div>
             </div>
         </div>

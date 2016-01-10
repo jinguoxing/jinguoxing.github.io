@@ -2,6 +2,7 @@
 layout: post
 title: "使用Sublime Text作为Markdown编辑器"
 description: "Sublime Text"
+author: "静中细思"
 category: 
 tags: []
 ---

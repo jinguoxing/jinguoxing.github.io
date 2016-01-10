@@ -3,6 +3,7 @@ layout: post
 title: Markdown 工具
 categories: markdown 
 date: 2015-07-01
+author: "静中细思"
 tags: 
     - markdown
 description: "介绍一些不同平台下Markdown的工具"

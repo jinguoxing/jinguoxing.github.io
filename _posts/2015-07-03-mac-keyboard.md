@@ -3,6 +3,7 @@ layout: post
 title: "Mac 键盘快捷键"
 description: ""
 category: mac
+author: "静中细思"
 tags: []
 ---
 
@@ -24,6 +25,7 @@ tags: []
 ----------------
 
 ###通用辅助功能
+
 
 
 

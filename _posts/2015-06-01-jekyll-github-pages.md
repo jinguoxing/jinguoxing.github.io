@@ -4,14 +4,21 @@ title: "使用rake自动生成文件"
 description: "使用rake自动生成一些模板"
 category: [jekyll,rake]
 date:  2015-06-01
+author: "静中细思"
 tags: 
-    -jekyll
+    - jekyll
 ---
 
 ####rake的安装
 `sudo gem install rake`
 
-####page或post的创建及发布
+可能出现的错误提示
+rake aborted!
+No Rakefile found (looking for: rakefile, Rakefile, rakefile.rb, Rakefile.rb)
+
+
+
+### page或post的创建及发布
 创建post文章
 
     rake post title="文章标题" date="日期"
