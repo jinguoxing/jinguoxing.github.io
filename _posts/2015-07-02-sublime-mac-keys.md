@@ -9,7 +9,7 @@ tags:
     - mac
 ---
 
-###Sublime Text3 插件的安装
+### Sublime Text3 插件的安装
 
 方法1： 通过 [Package Control](http://wbond.net/sublime_packages/package_control)
        
@@ -28,7 +28,7 @@ tags:
         OS X: ~/Library/Application Support/Sublime Text 3/Packages/
 
 
-###一些常用的快捷键
+### 一些常用的快捷键
 
 -----------------
 

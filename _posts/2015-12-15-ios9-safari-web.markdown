@@ -335,7 +335,7 @@ Bug 通常都要在几周之后才会显露出来，我也会持续跟进并更�
 对于 Apple TV ，它支持使用 JavaScript、DOM API 与 XMLHttpRequest 来让我们构建某种类似 Client-Server webapp 的东西。没有 HTML 和 CSS，这是什么把戏？其实它支持的叫 TVML，是一种基于 XML、为那些可以被渲染在 TV 屏幕上的特定内容而优化后的标签。这些标签只可以在来自应用商店的 native app 中渲染，但是这些 TVML 是由服务器端来生成的。
 
 
-### 著作权声明
+<h3> 著作权声明</h3>
 
 本文译自 [iOS 9, Safari and the Web: 3D Touch, new Responsive Web Design, Native integration and HTML5 APIs --- Breaking the Mobile Web](http://www.mobilexweb.com/blog/ios9-safari-for-web-developers)   
 译者 [黄玄](http://weibo.com/huxpro)，首次发布于 [Hux Blog](http://huangxuan.me)，转载请保留以上链接

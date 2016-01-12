@@ -536,9 +536,6 @@ pre code {
 .post-content-preview {
   font-size: 13px;
 }
-.post-content-preview:hover {
-  color: #f22a22;
-}
 @media only screen and (min-width: 768px) {
   .post-content-preview {
     font-size: 14px;
