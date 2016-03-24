@@ -9,7 +9,8 @@ tags:
     - jekyll
 ---
 
-####rake的安装
+### rake的安装
+
 `sudo gem install rake`
 
 可能出现的错误提示
