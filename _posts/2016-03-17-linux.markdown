@@ -6,17 +6,17 @@ category:
 tags: [Linux]
 ---
 
-#检查系统的信息
+### 检查系统的信息
 
-`
+```
     cat /etc/issue
     cat /etc/*-release
     uname -a
     MemTotal=`free -m | grep Mem | awk '{print  $2}'`
     df -h
-`
+```
 
-#更新LSB
+### 更新LSB
 通过yum来更新
  yum -y install redhat-lsb
 
@@ -24,7 +24,7 @@ tags: [Linux]
  apt-get update
  apt-get install -y lsb-release
 
-#lsb_release的命令
+### lsb_release的命令
 LSB (Linux Standard Base) and Dis‐tribution information
 目录文件  /etc/distrib-release
 lsb_release -a  打印出所有内容
@@ -37,7 +37,7 @@ lsb_release -a  打印出所有内容
        Codename:       TryIt
 
 
-#getconf用途
+### getconf用途
 将系统配置变量值写入标准输出,比如页面大小，整数大小之类
 
 getconf WORD_BIT  
@@ -47,16 +47,16 @@ getconf LONG_BIT
     但是long已变成了8字节inux系统中可用”getconf WORD_BIT”和”getconf LONG_BIT”获得word和long的位数。64位系统中应该分别得到32和64。
 
 
-#stty
+### stty
 
 
 
 
-#chkconfig的使用
+### chkconfig的使用
 
 
 
-#Linux系统如何设置系统所在的时区
+### Linux系统如何设置系统所在的时区
 
     方法1：使用tzselect设置时区
 
@@ -71,7 +71,7 @@ getconf LONG_BIT
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
     
 
-#selinux的使用(需深入)
+### selinux的使用(需深入)
 
     一、查看SELinux状态命令：
     1、/usr/sbin/sestatus -v      ##如果SELinux status参数为enabled即为开启状态
@@ -87,13 +87,13 @@ getconf LONG_BIT
     重启机器即可
 
 
-#LNMP在 centOS 安装前的准备工作
+### LNMP在 centOS 安装前的准备工作
 
     for packages in make cmake gcc gcc-c++ gcc-g77 flex bison file libtool libtool-libs autoconf kernel-devel patch wget libjpeg libjpeg-devel libpng libpng-devel libpng10 libpng10-devel gd gd-devel libxml2 libxml2-devel zlib zlib-devel glib2 glib2-devel unzip tar bzip2 bzip2-devel libevent libevent-devel ncurses ncurses-devel curl curl-devel libcurl libcurl-devel e2fsprogs e2fsprogs-devel krb5 krb5-devel libidn libidn-devel openssl openssl-devel vim-minimal gettext gettext-devel ncurses-devel gmp-devel pspell-devel unzip libcap diffutils ca-certificates net-tools libc-client-devel psmisc libXpm-devel git-core c-ares-devel libicu-devel libxslt libxslt-devel;
     do yum -y install $packages; done
 
 
-#shell笔记-local、export用法 
+### shell笔记-local、export用法 
 
      local一般用于局部变量声明，多在在函数内部使用。
     1.    Shell脚本中定义的变量是global的，其作用域从被定义的地方开始，到shell结束或被显示删除的地方为止。
@@ -108,11 +108,11 @@ getconf LONG_BIT
         -n 　删除指定的变量。变量实际上并未删除，只是不会输出到后续指令的执行环境中。
         -p 　列出所有的shell赋予程序的环境变量。
 
-#patch
+### patch
 此命令用于为特定软件包打补丁，他使用diff命令对源文件进行操作。  
 
 
 
-#ldconfig
+### ldconfig
 ldconfig是一个动态链接库管理命令，其目的为了让动态链接库为系统所共享。
 
