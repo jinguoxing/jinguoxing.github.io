@@ -6,8 +6,7 @@ category:
 tags: [高并发]
 ---
 
-### 转载：沈剑解析秒杀业务架构优化的思路
-转载地址[http://www.infoq.com/cn/articles/flash-deal-architecture-optimization?utm_source=infoq&utm_medium=popular_widget&utm_campaign=popular_content_list&utm_content=presentation]
+### [转载：沈剑解析秒杀业务架构优化的思路](http://www.infoq.com/cn/articles/flash-deal-architecture-optimization?utm_source=infoq&utm_medium=popular_widget&utm_campaign=popular_content_list&utm_content=presentation)
 
 ### 一、秒杀业务为什么难做
 
