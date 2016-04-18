@@ -6,10 +6,10 @@ category:
 tags: [高并发]
 ---
 
-#转载：沈剑解析秒杀业务架构优化的思路
+###转载：沈剑解析秒杀业务架构优化的思路
 [http://www.infoq.com/cn/articles/flash-deal-architecture-optimization?utm_source=infoq&utm_medium=popular_widget&utm_campaign=popular_content_list&utm_content=presentation]
 
-#一、秒杀业务为什么难做
+### 一、秒杀业务为什么难做
 
 IM系统，例如QQ或者微博，每个人都读自己的数据（好友列表、群列表、个人信息）。
 
