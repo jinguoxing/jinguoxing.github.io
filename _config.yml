@@ -15,8 +15,7 @@ RSS: false
 #weibo_username:     huxpro
 #zhihu_username:     
 #github_username:    jinguoxing
-#twitter_username:  huxpro
-#facebook_username:  huxpro
+
 
 
 
@@ -35,8 +34,16 @@ anchorjs: true                          # if you want to customize anchor. check
 #markdown: redcarpet
 markdown: kramdown
 kramdown:
-  input: GFM                            # use Github Flavored Markdown !important
-  syntax_highlighter: rouge
+  input: GFM
+  extensions:
+    - autolink
+    - footnotes
+    - smart
+  use_coderay: true
+  highlighter: rouge
+  coderay:
+    coderay_line_numbers:  nil
+
 # redcarpet:
 #    extensions: [ "hard_wrap", "autolink", "tables", "strikethrough", "superscript", "with_toc_data", "highlight", "prettify", "no_intra_emphasis"]
 # highlight: true
@@ -79,5 +86,9 @@ friends: [
     {
         title: "天镶的博客",
         href: "http://lingyu.wang/"
+    },
+    {
+       title: "Linux命令",
+        href: "http://man.linuxde.net"
     }
 ]

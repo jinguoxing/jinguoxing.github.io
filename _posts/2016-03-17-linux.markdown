@@ -8,13 +8,16 @@ tags: [Linux]
 
 ### 检查系统的信息
 
-```
-    cat /etc/issue
-    cat /etc/*-release
-    uname -a
-    MemTotal=`free -m | grep Mem | awk '{print  $2}'`
-    df -h
-```
+
+
+
+`bash
+cat /etc/issue  
+cat /etc/*-release 
+uname -a
+MemTotal=`free -m | grep Mem | awk '{print  $2}'`
+df -h 
+` 
 
 ### 更新LSB
 通过yum来更新
