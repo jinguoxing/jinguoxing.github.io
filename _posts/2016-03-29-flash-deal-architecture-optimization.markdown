@@ -3,6 +3,7 @@ layout: post
 title: "秒杀业务架构优化之路"
 description: ""
 category: 
+catalog:    true
 tags: [高并发]
 ---
 
