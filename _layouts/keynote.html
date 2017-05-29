@@ -18,6 +18,15 @@ layout: default
         height: 100%;
         border: 0;
     }
+    /* Override Nav Style */
+    {% if page.navcolor == "invert" %}
+        .navbar-custom .nav li a,
+        .navbar-custom .nav li a:hover,
+        .navbar-custom .navbar-brand,
+        .navbar-custom .navbar-brand:hover {color:#777;}
+        .navbar-default .navbar-toggle .icon-bar {background-color:#777;}
+
+    {% endif %}
 </style>
 <header class="intro-header" >
     <iframe src="{{page.iframe}}"/>
@@ -87,12 +96,18 @@ layout: default
                 <ul class="pager">
                     {% if page.previous.url %}
                     <li class="previous">
-                        <a href="{{ page.previous.url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{page.previous.title}}">&larr; Previous Post</a>
+                        <a href="{{ page.previous.url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{page.previous.title}}">
+                        Previous<br>
+                        <span>{{page.previous.title}}</span>
+                        </a>
                     </li>
                     {% endif %}
                     {% if page.next.url %}
                     <li class="next">
-                        <a href="{{ page.next.url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{page.next.title}}">Next Post &rarr;</a>
+                        <a href="{{ page.next.url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{page.next.title}}">
+                        Next<br>
+                        <span>{{page.next.title}}</span>
+                        </a>
                     </li>
                     {% endif %}
                 </ul>
@@ -217,7 +232,7 @@ layout: default
 </script>
 <!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
 <script>
-    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
         anchors.options = {
           visible: 'always',
           placement: 'right',

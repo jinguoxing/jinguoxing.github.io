@@ -4,7 +4,7 @@ SEOTitle: 静中细思的博客 | Kingnet Blog
 header-img: img/home-bg-o.jpg
 email: 49472873@qq.com
 description: "古今亿百年无有穷期,人生其间,数十寒暑,仅须臾耳,当思一搏"
-keyword: ""
+keyword: "kingnet"
 url: "http://jinguoxing.github.io"              # your host, for absolute URL
 baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
 gems: ['jekyll-paginate']
@@ -17,44 +17,55 @@ RSS: false
 #github_username:    jinguoxing
 
 
-
-
 # Build settings
-#highlighter: pygments
+# from 2016, 'pygments' is unsupported on GitHub Pages. Use 'rouge' for highlighting instead.
+highlighter: rouge
 permalink: pretty
 paginate: 10
 exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
 anchorjs: true                          # if you want to customize anchor. check out line:181 of `post.html`
 
 
+
+# Gems
+# from PR#40, to support local preview for Jekyll 3.0
+gems: [jekyll-paginate]
+
+
+
 # Markdown settings
 # replace redcarpet to kramdown,
 # although redcarpet can auto highlight code, the lack of header-id make the catalog impossible, so I switch to kramdown
 # document: http://jekyllrb.com/docs/configuration/#kramdown
-#markdown: redcarpet
+
 markdown: kramdown
+highlighter: rouge
+lsi:         false
+excerpt_separator: "\n\n"
+incremental: false
+
 kramdown:
-  input: GFM
+  auto_ids:       true
+  entity_output:  as_char
+  toc_levels:     1..6
+  smart_quotes:   lsquo,rsquo,ldquo,rdquo
+  input:          GFM
+  hard_wrap:      false
+  footnote_nr:    1
   extensions:
     - autolink
     - footnotes
     - smart
-  use_coderay: true
-  highlighter: rouge
-  coderay:
-    coderay_line_numbers:  nil
 
-# redcarpet:
-#    extensions: [ "hard_wrap", "autolink", "tables", "strikethrough", "superscript", "with_toc_data", "highlight", "prettify", "no_intra_emphasis"]
-# highlight: true
+
 
 # Disqus settings
 #disqus_username: _your_disqus_short_name_
 
 # Duoshuo settings
-#duoshuo_username: huxblog
+duoshuo_username: false
 # Share component is depend on Comment so we can NOT use share only.
-#duoshuo_share: true                     # set to false if you want to use Comment without Sharing
+duoshuo_share: false                     # set to false if you want to use Comment without Sharing
 
 
 
@@ -74,6 +85,9 @@ sidebar-about-description: "写写代码，弹弹吉他，陪陪女儿。世界�
 sidebar-avatar: /img/avatar-kingnet.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
+# Progressive Web Apps
+chrome-tab-theme-color: "#000000"
+service-worker: true
 
 # Featured Tags
 featured-tags: true                     # whether or not using Feature-Tags
@@ -81,11 +95,17 @@ featured-condition-size: 1              # A tag will be featured if the size of 
 
 
 
+# Progressive Web Apps
+chrome-tab-theme-color: "#000000"
+service-worker: true
+
+
+
 # Friends
 friends: [
     {
-        title: "天镶的博客",
-        href: "http://lingyu.wang/"
+        title: "前端外刊评论",
+        href: "http://qianduan.guru/"
     },
     {
        title: "Linux命令",
