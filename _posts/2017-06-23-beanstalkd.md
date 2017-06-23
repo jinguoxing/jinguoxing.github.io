@@ -5,13 +5,13 @@ description: ""
 category: 
 tags: [Beanstalkd]
 ---
-##Beanstalkd中文协议
+## Beanstalkd中文协议
 
-###总括
+### 总括
 
 `beanstalkd`协议基于ASCII编码运行在tcp上。客户端连接服务器并发送指令和数据，然后等待响应并关闭连接。对于每个连接，服务器按照接收命令的序列依次处理并响应。所有整型值都非负的十进制数，除非有特别声明。
 
-###名称约定
+### 名称约定
 
 所有名称必须是ASCII码字符串，即包括：
 
@@ -28,7 +28,7 @@ tags: [Beanstalkd]
 
 **注意**：名称不能以连字符开始，并且是以空白字符结束，每个名称至少包含一个字符。
 
-###错误说明
+### 错误说明
 
 | 返回的错误                               | 描述       |
 | --------------------------------------- | -------- |
@@ -37,7 +37,7 @@ tags: [Beanstalkd]
 | `BAD_FORMAT\r\n`                         | 格式不正确，客户端发送的指令格式出错，有可能不是以\r\n结尾，或者要求整型值等等 |
 | `UNKNOWN_COMMAND\r\n`                   | 未知的命令，客户端发送的指令服务器不理解 |
 
-###job的生命周期
+### job的生命周期
 一个工作任务job当client使用put命令时创建。在整个生命周期中job可能有四个工作状态：ready，reserved，delayed，buried。在put之后，一个job的典型状态是ready，在ready队列中，它将等待一个worker取出此job并设置为其为reserved状态。worker占有此job并执行，当job执行完毕，worker可以发送一个delete指令删除此job。
 
 | Status              | Description   |
@@ -76,15 +76,15 @@ job可能的状态迁移
                         `--------> *poof*
 ```
 
-##Tubes
+## Tubes
 一个服务器有一个或者多个tubes，用来储存统一类型的job。每个tube由一个就绪队列与延迟队列组成。每个job所有的状态迁移在一个tube中完成。consumers消费者可以监控感兴趣的tube，通过发送watch指令。consumers消费者可以取消监控tube，通过发送ignore命令。通过watch list命令返回所有监控的tubes，当客户端预订一个job，此job可能来自任何一个它监控的tube。
 
 当一个客户端连接上服务器时，客户端监控的tube默认为defaut，如果客户端提交job时，没有使用use命令，那么这些job就存于名为default的tube中。
 
 tube按需求创建，无论他们在什么时候被引用到。如果一个tube变为空（即no ready jobs，no delayed jobs，no buried jobs）和没有任何客户端引用，它将会被自动删除。
 
-###指令说明（Commands）
-####生产者指令说明（Producer Commands）
+### 指令说明（Commands）
+#### 生产者指令说明（Producer Commands）
 
 ### 客户端链接
 ```
