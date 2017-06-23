@@ -84,13 +84,15 @@ job可能的状态迁移
 tube按需求创建，无论他们在什么时候被引用到。如果一个tube变为空（即no ready jobs，no delayed jobs，no buried jobs）和没有任何客户端引用，它将会被自动删除。
 
 ### 指令说明（Commands）
+
 #### 生产者指令说明（Producer Commands）
 
 ### 客户端链接
 ```
 telnet 127.0.0.1 11300    
-`
-####`put`
+```
+
+#### `put`
 
 插入一个job到队列
 
@@ -129,7 +131,7 @@ DRAINING\r\n
 表示服务器资源耗尽，表示服务器已经进入了“drain mode”，服务器再也不能接受连接，客户端应该使用另一个服务器或者断开稍后重试
 
 
-####`use`
+#### `use`
 说明
 producer生产者使用，随后使用put命令，将job放置于对应的tube
 格式
@@ -143,7 +145,7 @@ USING <tube>\r\n tube为正在使用的tube名称
 ```
 消费者指令说明（Worker Commands）
 
-####`reserve`
+#### `reserve`
 说明
 取出（预订）job，待处理。它将返回一个新预订的job，如果没有job，beanstalkd将直到有job时才发送响应。一旦job状态迁移为reserved,取出job的client被限制在指定的时间（如果设置了ttr）完成，否则超时，job状态重装迁移为ready。
 格式
@@ -169,7 +171,7 @@ RESERVED <id> <bytes>\r\n
 ```
 成功取出job，id为job id,整型值，job body的长度，不包含\r\n，data为job body
 
-####`delete`
+#### `delete`
 说明
 从队列中删除一个job
 格式
@@ -215,7 +217,7 @@ id为job id
 TOUCHED\r\n 表明成功
 NOT_FOUND\r\n 如果job不存在或者client没有预订此job
 
-####`watch`
+#### `watch`
 说明
 添加监控的tube到watch list列表，reserve指令将会从监控的tube列表获取job，对于每个连接，监控的列表默认为default
 格式
@@ -229,7 +231,7 @@ WATCHING <count>\r\n 表明成功
 ```
 count 整型值，已监控的tube数量
 
-####`ignore`
+#### `ignore`
 说明
 从已监控的watch list列表中移出特定的tube
 格式
@@ -245,7 +247,7 @@ count 整型值，已监控的tube数量
 NOT_IGNORED\r\n 如果client企图忽略其仅有的tube时的响应
 其他指令说明（Other Command）
 
-####`peek`
+#### `peek`
 说明
 让client在系统中检查job，有四种形式的命令，其中第一种形式的指令是针对当前使用的tube
 格式
@@ -264,7 +266,7 @@ id 为对应的job id
 bytes job body的字节数
 data 为job body
 
-####`kick`
+#### `kick`
 说明
 此指令应用在当前使用的tube中，它将job的状态迁移为ready或者delayed
 格式
@@ -290,7 +292,7 @@ id 为job id
 NOT_FOUND\r\n 如果job不存在，或者job是不可唤醒的状态
 KICKED\r\n 表明成功
 
-####`stats-job`
+#### `stats-job`
 说明
 统计job的相关信息
 格式
@@ -322,7 +324,7 @@ data 为YAML file的统计信息
 - `buries` 表示job被buried的次数
 - `kicks` 表示job被kiced的次数
 
-####`stats-tube`
+####  `stats-tube`
 **说明**
 统计tube的相关信息
 **格式**
@@ -353,7 +355,7 @@ data 为YAML file的统计信息
 - `cmd-pause-tube` 此tube中总共执行pause-tube指令的次数
 - `pause-time-left` 此tube暂停剩余的秒数
 
-####`stats`
+#### `stats`
 **说明**
 返回整个消息队列系统的整体信息
 **格式**
@@ -413,7 +415,7 @@ data 为YAML file的统计信息
 - `id` 一个随机字符串，在beanstalkd进程启动时产生
 - `hostname` 主机名
 
-####`list-tubes`
+#### `list-tubes`
 说明
 列表所有存在的tube
 格式
@@ -430,7 +432,7 @@ OK <bytes>\r\n
 bytes 为接下来的data区块的长度
 data 为YAML file，包含所有的tube名称
 
-####`list-tube-used`
+#### `list-tube-used`
 说明
 列表当前client正在use的tube
 格式
@@ -443,7 +445,7 @@ USING <tube>\r\n
 ```
 tube 为tube名称
 
-####`list-tubes-watched`
+#### `list-tubes-watched`
 说明
 列表当前client watch的tube
 格式
@@ -459,7 +461,7 @@ OK <bytes>\r\n
 bytes 为接下来的data区块的长度
 data 为YAML file，包含所有的tube名称
 
-####`quit`
+#### `quit`
 说明
 关闭连接
 格式
@@ -467,10 +469,11 @@ data 为YAML file，包含所有的tube名称
 quit\r\n
 ```
 
-####`pause-tube`
-#####说明
+#### `pause-tube`
+
+##### 说明
 此指令针对特定的tube内所有新的job延迟给定的秒数
-#####格式
+##### 格式
 ```
 pause-tube <tube-name> <delay>\r\n
 ```
@@ -480,5 +483,3 @@ PAUSED\r\n 表示成功
 NOT_FOUND\r\n tube不存在
 ```
 
-
->Translated by PHPBoy :http://www.phpboy.net/ and fzb.me
