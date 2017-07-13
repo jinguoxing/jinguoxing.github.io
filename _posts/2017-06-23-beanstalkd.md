@@ -108,7 +108,7 @@ put <pri> <delay> <ttr> <bytes>\r\n
 * `<data>`   job body
 
 
-响应
+**响应**
 ```
 INSERTED <id>\r\n
 ```
@@ -186,7 +186,7 @@ id为job id
 DELETED\r\n 删除成功
 NOT_FOUND\r\n job不存在时，或者job的状态不为ready和buried（这种情况是在job执行超时之前，client发送了delete指令）
 
-####`release`
+#### `release`
 说明
 release指令将一个reserved的job放回ready queue。它通常在job执行失败时使用。
 格式
@@ -194,6 +194,7 @@ release指令将一个reserved的job放回ready queue。它通常在job执行失
 release <id> <pri> <delay>\r\n
 ```
 id 为job id，pri为job的优先级，delay为延迟ready的秒数
+
 ##### 响应
 RELEASED\r\n 表明成功
 BURIED\r\n 如服务器为了增加队列的优先级而，内存不足时返回
@@ -207,7 +208,7 @@ NOT_FOUND\r\n 如果job不存在或者client没有预订此job
 bury <id> <pri>\r\n
 ```
 id为job id，pri为优先级
-响应
+**响应**
 BURIED\r\n 表明成功
 NOT_FOUND\r\n 如果job不存在或者client没有预订此job
 
@@ -219,7 +220,7 @@ NOT_FOUND\r\n 如果job不存在或者client没有预订此job
 touch <id>\r\n
 ```
 id为job id
-响应
+**响应**
 TOUCHED\r\n 表明成功
 NOT_FOUND\r\n 如果job不存在或者client没有预订此job
 
@@ -231,7 +232,7 @@ NOT_FOUND\r\n 如果job不存在或者client没有预订此job
 watch <tube>\r\n
 ```
 tube 为监控的tube名称，名称最大为200字节，如果tube不存在会自动创建
-响应
+**响应**
 ```
 WATCHING <count>\r\n 表明成功
 ```
@@ -245,7 +246,7 @@ count 整型值，已监控的tube数量
 ignore <tube>\r\n
 ```
 tube 为移出的tube名称，名称最多为200字节，如果tube不存在会自动创建
-响应
+**响应**
 ```
 WATCHING <count>\r\n 表明成功
 ```
@@ -263,7 +264,7 @@ peek-ready\r\n 返回下一个ready job
 peek-delayed\r\n 返回下一个延迟剩余时间最短的job
 peek-buried\r\n 返回下一个在buried列表中的job
 ```
-响应
+**响应**
 NOT_FOUND\r\n 如果job不存在，或者没有对应状态的job
 ```
 FOUND <id> <bytes>\r\n <data>\r\n
@@ -281,7 +282,7 @@ kick <bound>\r\n
 ```
 bound 整型值，唤醒的job上限
 
-响应
+**响应**
 ```
 KICKED <count>\r\n
 ```
@@ -306,7 +307,8 @@ KICKED\r\n 表明成功
 stats-job <id>\r\n
 ```
 id 为job id
-响应
+
+**响应**
 ```
 NOT_FOUND\r\n 如果job不存在
 
@@ -429,7 +431,7 @@ data 为YAML file的统计信息
 list-tubes\r\n
 ```
 
-响应
+**响应**
 ```
 OK <bytes>\r\n
 
@@ -445,7 +447,7 @@ data 为YAML file，包含所有的tube名称
 ```
 list-tube-used\r\n
 ```
-响应
+**响应**
 ```
 USING <tube>\r\n
 ```
@@ -458,7 +460,7 @@ tube 为tube名称
 ```
 list-tubes-watched\r\n
 ```
-响应
+**响应**
 ```
 OK <bytes>\r\n
 
@@ -483,7 +485,7 @@ quit\r\n
 ```
 pause-tube <tube-name> <delay>\r\n
 ```
-##### 响应
+**响应**
 ```
 PAUSED\r\n 表示成功
 NOT_FOUND\r\n tube不存在
