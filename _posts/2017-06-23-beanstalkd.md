@@ -11,6 +11,19 @@ tags: [Beanstalkd]
 
 `beanstalkd`协议基于ASCII编码运行在tcp上。客户端连接服务器并发送指令和数据，然后等待响应并关闭连接。对于每个连接，服务器按照接收命令的序列依次处理并响应。所有整型值都非负的十进制数，除非有特别声明。
 
+### beanstalk核心概念：
+
+job:一个需要异步处理的任务，需要放在一个tube中。
+tube:一个有名的任务队列，用来存储统一类型的job
+producer:job的生产者
+consumer:job的消费者
+
+简单来说流程就一句话：
+由 producer 产生一个任务 job ，并将 job 推进到一个 tube 中，
+然后由 consumer 从 tube 中取出 job 执行
+
+
+
 ### 名称约定
 
 所有名称必须是ASCII码字符串，即包括：
@@ -75,6 +88,22 @@ job可能的状态迁移
                        |  delete
                         `--------> *poof*
 ```
+
+一个job有READY（时刻准备着被消费者取出）, RESERVED（任务正在被一个消费者处理中）, DELAYED（延迟任务，设定的延迟时间后进入ready状态）, BURIED（休眠中，需要转移状态后才能操作）四种状态。当producer直接put一个job时，job就处于READY状态，等待consumer来处理，如果选择延迟put，job就先到DELAYED状态，等待时间过后才迁移到READY状态。consumer获取了当前READY的job后，该job的状态就迁移到RESERVED，这样其他的consumer就不能再操作该job。当consumer完成该job后，可以选择delete, release或者bury操作;delete之后，job从系统消亡，之后不能再获取;release操作可以重新把该job状态迁移回READY(也可以延迟该状态迁移操作)，使其他的consumer可以继续获取和执行该job;有意思的是bury操作，可以把该job休眠，等到需要的时候，再将休眠的job kick回READY状态，也可以delete BURIED状态的job。正是有这些有趣的操作和状态，才可以基于此做出很多意思的应用，比如要实现一个循环队列，就可以将RESERVED状态的job休眠掉，等没有READY状态的job时再将BURIED状态的job一次性kick回READY状态。
+
+
+### beanstalkd拥有的一些特性：
+
+++    producer产生的任务可以给他分配一个优先级，支持0到2**32的优先级，值越小，优先级越高，默认优先级为1024。
+    优先级高的会被消费者首先执行
+++    持久化，可以通过binlog将job及其状态记录到文件里面，在Beanstalkd下次启动时可以
+    通过读取binlog来恢复之前的job及状态。
+++    分布式容错，分布式设计和Memcached类似，beanstalkd各个server之间并不知道彼此的存在，
+    都是通过client来实现分布式以及根据tube名称去特定server获取job。
+++    超时控制，为了防止某个consumer长时间占用任务但不能处理的情况，
+    Beanstalkd为reserve操作设置了timeout时间，如果该consumer不能在指定时间内完成job，
+    job将被迁移回READY状态，供其他consumer执行。
+
 
 ## Tubes
 一个服务器有一个或者多个tubes，用来储存统一类型的job。每个tube由一个就绪队列与延迟队列组成。每个job所有的状态迁移在一个tube中完成。consumers消费者可以监控感兴趣的tube，通过发送watch指令。consumers消费者可以取消监控tube，通过发送ignore命令。通过watch list命令返回所有监控的tubes，当客户端预订一个job，此job可能来自任何一个它监控的tube。
@@ -207,7 +236,9 @@ NOT_FOUND\r\n 如果job不存在或者client没有预订此job
 ```
 bury <id> <pri>\r\n
 ```
+
 id为job id，pri为优先级
+
 **响应**
 BURIED\r\n 表明成功
 NOT_FOUND\r\n 如果job不存在或者client没有预订此job
