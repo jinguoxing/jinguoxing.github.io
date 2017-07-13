@@ -154,7 +154,8 @@ reserve\r\n
 ```
 可选的一个相似的命令
 `reserve-with-timeout \r\n` 设置取job的超时时间，timeout设置为0时，服务器立即响应或者TIMED_OUT，积极的设置超时，将会限制客户端阻塞在取job的请求的时间。
-#####失败响应
+
+##### 失败响应
 ```
 DEADLINE_SOON\r\n
 ```
@@ -164,7 +165,8 @@ DEADLINE_SOON\r\n
 ```
 TIMED_OUT\r\n 超时
 ```
-#####成功响应
+
+##### 成功响应
 ```
 RESERVED <id> <bytes>\r\n
 <data>\r\n
@@ -179,9 +181,11 @@ RESERVED <id> <bytes>\r\n
 delete <id>\r\n
 ```
 id为job id
-响应
+
+##### 响应
 DELETED\r\n 删除成功
 NOT_FOUND\r\n job不存在时，或者job的状态不为ready和buried（这种情况是在job执行超时之前，client发送了delete指令）
+
 ####`release`
 说明
 release指令将一个reserved的job放回ready queue。它通常在job执行失败时使用。
@@ -190,11 +194,12 @@ release指令将一个reserved的job放回ready queue。它通常在job执行失
 release <id> <pri> <delay>\r\n
 ```
 id 为job id，pri为job的优先级，delay为延迟ready的秒数
-响应
+##### 响应
 RELEASED\r\n 表明成功
 BURIED\r\n 如服务器为了增加队列的优先级而，内存不足时返回
 NOT_FOUND\r\n 如果job不存在或者client没有预订此job
-####`bury`
+
+#### `bury`
 说明
 将一个job的状态迁移为buried，通过kick命令唤醒
 格式
@@ -205,7 +210,8 @@ id为job id，pri为优先级
 响应
 BURIED\r\n 表明成功
 NOT_FOUND\r\n 如果job不存在或者client没有预订此job
-####`touch`
+
+#### `touch`
 说明
 允许worker请求更多的时间执行job，这个很有用当job需要很长的时间来执行，worker可用周期的告诉服务器它仍然在执行job（可以被DEADLINE_SOON触发）
 格式
@@ -477,7 +483,7 @@ quit\r\n
 ```
 pause-tube <tube-name> <delay>\r\n
 ```
-#####响应
+##### 响应
 ```
 PAUSED\r\n 表示成功
 NOT_FOUND\r\n tube不存在
