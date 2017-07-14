@@ -42,16 +42,22 @@ tags: [Beanstalkd]
 
 ### beanstalk核心概念：
 
-job:一个需要异步处理的任务，需要放在一个tube中。
-tube:一个有名的任务队列，用来存储统一类型的job
-producer:job的生产者
-consumer:job的消费者
+-job:
+  一个需要异步处理的任务，是Beanstalkd中的基本单元，需要放在一个tube中。
+
+-tube:
+  一个有名的任务队列，用来存储统一类型的job，是producer和consumer操作的对象。
+
+-producer:
+  Job的生产者，通过put命令来将一个job放到一个tube中。
+
+-consumer:
+  Job的消费者，通过reserve/release/bury/delete命令来获取job或改变job的状态。
+
 
 简单来说流程就一句话：
 由 producer 产生一个任务 job ，并将 job 推进到一个 tube 中，
 然后由 consumer 从 tube 中取出 job 执行
-
-
 
 ### 名称约定
 
