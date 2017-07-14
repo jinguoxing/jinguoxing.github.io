@@ -5,6 +5,35 @@ description: ""
 category: 
 tags: [Beanstalkd]
 ---
+
+## 安装
+
+###  官网
+    [https://kr.github.io/beanstalkd/](https://kr.github.io/beanstalkd/)
+
+### 安装 
+    -- CentOS and RHEL
+    yum install beanstalkd --enablerepo=epel
+
+
+    -- MAC OS X
+    Homebrew 
+    ```
+    brew install beanstalkd
+    ```
+    MacPorts 
+    ```
+    sudo port install beanstalkd
+    ```
+
+### 启动 
+    
+    
+    /usr/bin/beanstalkd -l 127.0.0.1 -p 11300 -b /var/lib/beanstalkd/binlog -F
+    
+    注： -b 开启binlog，断电后重启会自动恢复任务。
+    
+
 ## Beanstalkd中文协议
 
 ### 总括
@@ -94,15 +123,19 @@ job可能的状态迁移
 
 ### beanstalkd拥有的一些特性：
 
-++    producer产生的任务可以给他分配一个优先级，支持0到2**32的优先级，值越小，优先级越高，默认优先级为1024。
+***优先级***
+    producer产生的任务可以给他分配一个优先级，支持0到2**32的优先级，值越小，优先级越高，默认优先级为1024。
     优先级高的会被消费者首先执行
-++    持久化，可以通过binlog将job及其状态记录到文件里面，在Beanstalkd下次启动时可以
-    通过读取binlog来恢复之前的job及状态。
-++    分布式容错，分布式设计和Memcached类似，beanstalkd各个server之间并不知道彼此的存在，
-    都是通过client来实现分布式以及根据tube名称去特定server获取job。
-++    超时控制，为了防止某个consumer长时间占用任务但不能处理的情况，
-    Beanstalkd为reserve操作设置了timeout时间，如果该consumer不能在指定时间内完成job，
-    job将被迁移回READY状态，供其他consumer执行。
+
+***持久化*** 
+    可以通过binlog将job及其状态记录到文件里面，在Beanstalkd下次启动时可以通过读取binlog来恢复之前的job及状态。
+
+***分布式容错*** 
+    分布式设计和Memcached类似，beanstalkd各个server之间并不知道彼此的存在，都是通过client来实现分布式以及根据tube名称去特定server获取job。
+
+***超时控制***
+    为了防止某个consumer长时间占用任务但不能处理的情况，
+    Beanstalkd为reserve操作设置了timeout时间，如果该consumer不能在指定时间内完成job，job将被迁移回READY状态，供其他consumer执行。
 
 
 ## Tubes
