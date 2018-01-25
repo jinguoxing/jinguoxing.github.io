@@ -129,12 +129,23 @@ job可能的状态迁移
 
 ### beanstalkd拥有的一些特性：
 
-***优先级***
+***任务优先级 (priority)***
     producer产生的任务可以给他分配一个优先级，支持0到2**32的优先级，值越小，优先级越高，默认优先级为1024。
-    优先级高的会被消费者首先执行
+    beanstalkd 采用最大最小堆 (Min-max heap) 处理任务优先级排序, 任何时刻调用 reserve 命令的消费者总是能拿到当前优先级最高的任务, 时间复杂度为 O(logn)。
+
 
 ***持久化*** 
     可以通过binlog将job及其状态记录到文件里面，在Beanstalkd下次启动时可以通过读取binlog来恢复之前的job及状态。
+
+***延时任务 (delay)***
+    有两种方式可以延时执行任务 (job): 生产者发布任务时指定延时；或者当任务处理完毕后, 消费者再次将任务放入队列延时执行 (RELEASE with )。这种机制可以实现分布式的 java.util.Timer，这种分布式定时任务的优势是：如果某个消费者节点故障，任务超时重发 (time-to-run) 能够保证任务转移到另外的节点执行。
+
+***任务超时重发 (time-to-run)***
+    Beanstalkd 把任务返回给消费者以后：消费者必须在预设的 TTR (time-to-run) 时间内发送 delete / release/ bury 改变任务状态；否则 Beanstalkd 会认为消息处理失败，然后把任务交给另外的消费者节点执行。如果消费者预计在 TTR (time-to-run) 时间内无法完成任务, 也可以发送 touch 命令, 它的作用是让 Beanstalkd 从系统时间重新计算 TTR (time-to-run)。
+
+***任务预留 (buried)***
+
+    如果任务因为某些原因无法执行, 消费者可以把任务置为 buried 状态让 Beanstalkd 保留这些任务。管理员可以通过 peek buried 命令查询被保留的任务，并且进行人工干预。简单的, kick 能够一次性把 n 条被保留的任务踢回队列。
 
 ***分布式容错*** 
     分布式设计和Memcached类似，beanstalkd各个server之间并不知道彼此的存在，都是通过client来实现分布式以及根据tube名称去特定server获取job。
