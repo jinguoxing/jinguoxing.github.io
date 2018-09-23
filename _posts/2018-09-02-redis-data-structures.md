@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Redis data structurces
+title: "redis 数据结构"
 description: ""
-category: redis 数据结构
-tags: []
+category: 
+tags: [redis]
 ---
 
 
