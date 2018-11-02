@@ -1,104 +1,142 @@
 ---
 layout: post
-title: "Redis 分布式锁"
+title: "Redis HyperLogLog 介绍"
 description: ""
 category: redis
 tags: [redis]
 ---
 
 
-比如一个操作要修改用户的状态，修改状态需要先读出用户的状态，在内存里进行修改，改完了再存回去。如果这样的操作同时进行了，就会出现并发问题，因为读取和保存状态这两个操作不是原子的。
+## 场景
 
-**所谓原子操作是指不会被线程调度机制打断的操作；这种操作一旦开始，就一直运行到结束，中间不会有任何 context switch 线程切换。**
+<span style="color:red"><b>思考：如何开发一个统计模块，实现网站每个网页每天的PV数据和 UV 数据</b></span>
 
-![并发](../img/redis-images/20180923-194422.png)
+如果统计 PV 那非常好办，给每个网页一个独立的 Redis 计数器就可以了，这个计数器的 key 后缀加上当天的日期。
 
-### 分布式锁
+这样来一个请求，incrby 一次，最终就可以统计出所有的 PV 数据。
 
-分布式锁本质上要实现的目标就是在 Redis 里面占一个“坑”，当别的进程也要来占时，发现已经有人占了，就只好放弃或者稍后再试。
+但是 UV 不一样，它要去重，同一个用户一天之内的多次访问请求只能计数一次。
 
-占坑一般是使用 setnx(set if not exists) 指令，只允许被一个客户端占坑。先来先占， 用完了，再调用 del 指令释放。
-
-
-
-> setnx lock:code true
-
-> del lock:code
+这就要求每一个网页请求都需要带上用户的 ID，无论是登陆用户还是未登陆用户都需要一个唯一 ID 来标识。
 
 
 
-但是有个问题，如果逻辑执行到中间出现异常了，可能会导致 del 指令没有被调用，这样就会陷入死锁，锁永远得不到释放。
+<hr>
+也许你想到了一个简单的方案，那就是为每一个页面一个独立的 set 集合来存储所有当天访问过此页面的用户 ID。当一个请求过来时，
 
+我们使用 sadd 将用户 ID 塞进去就可以了。通过 scard 可以取出这个集合的大小，这个数字就是这个页面的 UV 数据。没错，这是一个非常简单的方案。
 
-> setnx lock:code true
-    
-> expire lock:code 5
+但是，如果你的页面访问量非常大，比如一个爆款页面几千万的 UV，你需要一个很大的 set 集合来统计，这就非常浪费空间。
 
-> del lock:code
-    
-如果在 setnx 和 expire 之间服务器进程突然挂掉了，可能是因为机器掉电或者是被人为杀掉的，就会导致 expire 得不到执行，也会造成死锁。
+如果这样的页面很多，那所需要的存储空间是惊人的。为这样一个去重功能就耗费这样多的存储空间，值得么？
 
-这种问题的根源就在于 setnx 和 expire 是两条指令而不是原子指令。如果这两条指令可以一起执行就不会出现问题。
+其实如果统计的数据又不需要太精确，105w 和 106w 这两个数字并没有多大区别，那有没有更好的解决方案呢？
 
-### 解决方法
+<hr>
 
-- **Lua脚本**      
+Redis 提供了 HyperLogLog 数据结构就是用来解决这种统计问题的。
 
- ```lua
-    
-        local key   = KEYS[1]
-        local value = ARGV[1]
-        local ttl   = ARGV[2]
+HyperLogLog 提供不精确的去重计数方案，虽然不精确但是也不是非常不精确，标准误差是 0.81%，这样的精确度已经可以满足上面的 UV 统计需求了。
 
-        local ok = redis.call('setnx', key, value)
-        if ok == 1 then
-            redis.call('expire', key, ttl)
-        end
-        return ok
-```
+## 使用方法
 
-- **set的命令**
+HyperLogLog 提供了两个指令 pfadd 和 pfcount，根据字面意义很好理解，一个是增加计数，一个是获取计数。
 
-SET key value [EX seconds] [PX milliseconds] [NX|XX]
+pfadd 用法和 set 集合的 sadd 是一样的，来一个用户 ID，就将用户 ID 塞进去就是。
+
+pfcount 和 scard 用法是一样的，直接获取计数值。
 
 
 ```python
-!redis-cli set lock:code true ex 5 nx
+!redis-cli del uv
+!redis-cli pfadd uv user1
+!redis-cli pfadd uv user2 user3 user4 user5 user6 user7 user8 user9 user10 
+!redis-cli pfcount uv 
 ```
 
+    (integer) 1
+    (integer) 1
+    (integer) 1
+    (integer) 10
+
+
+
+简单试了一下，发现还蛮精确的，一个没多也一个没少。接下来我们使用脚本，往里面输入更多的数据，看看它是否还可以继续精确下去，如果不能精确，差距有多大。
+
+
+
+```python
+import redis
+
+client = redis.StrictRedis()
+for i in range(100):
+    client.pfadd("uv", "user%d" % i)
+    total = client.pfcount("uv")
+    if total != i+1:
+        print(total, i+1)
+        break
+```
+
+    99 100
+
+
+当我们加入第 100 个元素时，结果开始出现了不一致。接下来我们将数据增加到 10w 个，看看总量差距有多大。
+
+
+```python
+import redis
+
+client = redis.StrictRedis()
+for i in range(100000):
+    client.pfadd("uv", "user%d" % i)
+print(100000, client.pfcount("uv"))
+```
+
+    100000 99723
+
+
+差了 277 个，按百分比是 0.277%，对于上面的 UV 统计需求来说，误差率也不算高。
+
+然后我们把上面的脚本再跑一边，也就相当于将数据重复加入一边，查看输出，可以发现，pfcount 的结果没有任何改变，还是 99723，
+
+说明它确实具备去重功能。
+
+### pfmerge 场景使用
+
+
+```python
+HyperLogLog 除了上面的 pfadd 和 pfcount 之外，还提供了第三个指令 pfmerge，用于将多个 pf 计数值累加在一起形成一个新的 pf 值。
+
+比如在网站中我们有两个内容差不多的页面，运营说需要这两个页面的数据进行合并。其中页面的 UV 访问量也需要合并，
+
+那这个时候 pfmerge 就可以派上用场了。
+
+```
+
+
+```python
+!redis-cli PFADD  nosql  "Redis"  "MongoDB"  "Memcached"
+!redis-cli PFADD  RDBMS  "MySQL" "MSSQL" "PostgreSQL"
+!redis-cli PFMERGE  databases  nosql  RDBMS
+!redis-cli PFCOUNT  databases
+```
+
+    (integer) 1
+    (integer) 1
     OK
+    (integer) 6
 
 
-### 超时问题
+## 注意事项
 
-Redis 的分布式锁不能解决超时问题，如果在加锁和释放锁之间的逻辑执行的太长，以至于超出了锁的超时限制，就会出现问题。
+   HyperLogLog 这个数据结构不是免费的，不是说使用这个数据结构要花钱，它需要占据一定 12k 的存储空间，所以它不适合统计单个用户相关的数据。
 
-因为这时候锁过期了，第二个线程重新持有了这把锁，但是紧接着第一个线程执行完了业务逻辑，就把锁给释放了，
-
-第三个线程就会在第二个线程逻辑执行完之间拿到了锁。
+如果你的用户上亿，可以算算，这个空间成本是非常惊人的。但是相比 set 存储方案，HyperLogLog 所使用的空间那真是可以使用千斤对比四两来形容了。
 
 
-有一个稍微安全一点的方案是为 set 指令的 value 参数设置为一个随机数，
+   不过你也不必过于担心，因为 Redis 对 HyperLogLog 的存储进行了优化，在计数比较小时，它的存储空间采用稀疏矩阵存储，空间占用很小，
 
-释放锁时先匹配随机数是否一致，然后再删除 key，这是为了确保当前线程占有的锁不会被其它线程释放，除非这个锁是过期了被服务器自动释放的。
-
-但是匹配 value 和删除 key 不是一个原子操作，Redis 也没有提供类似于delifequals这样的指令，
-
-这就需要使用 Lua 脚本来处理了，因为 Lua 脚本可以保证连续多个指令的原子性执行。
+仅仅在计数慢慢变大，稀疏矩阵占用空间渐渐超过了阈值时才会一次性转变成稠密矩阵，才会占用 12k 的空间。
 
 
-```lua
-
-if redis.call("get",KEYS[1]) == ARGV[1] then
-    return redis.call("del",KEYS[1])
-else
-    return 0
-end
-
-```
-
-但是这也不是一个完美的方案，它只是相对安全一点，因为如果真的超时了，当前线程的逻辑没有执行完，其它线程也会乘虚而入。
-
-
-
-
+## HyperLogLog 实现原理   (感兴趣可以深入研究)

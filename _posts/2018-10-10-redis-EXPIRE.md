@@ -1,0 +1,362 @@
+---
+layout: post
+title: "Redis的过期策略及淘汰策略"
+description: ""
+category: redis
+tags: [redis]
+---
+
+
+ 
+
+## 设置键的生存时间或过期时间
+
+### 设置生存时间
+
+通过EXPIRE 或PEXPIRE ，客户端可以以秒或者毫秒精度为数据库中的某个键设置生存时间（Time To Live，TTL），
+
+在经过指定的秒数或毫秒数之后，服务器就会自动删除生存时间为0的键。
+
+
+```python
+!redis-cli set key value 
+!redis-cli expire key 100
+!redis-cli ttl key
+```
+
+    OK
+    (integer) 1
+    (integer) 100
+
+
+
+```python
+!redis-cli ttl key
+```
+
+    (integer) 90
+
+
+
+```python
+!redis-cli set key1 value 
+!redis-cli pexpire key1 9000
+!redis-cli pttl key1
+```
+
+    OK
+    (integer) 1
+    (integer) 2881
+
+
+
+```python
+!redis-cli pttl key1
+```
+
+    (integer) 445
+
+
+### 设置过期时间
+
+通过EXPIREAT或PEXPIREAT命令，以秒或毫秒的精度给数据库中的某个键设置过期时间（expire time），
+
+过期时间是一个UNIX时间戳，当键的过期时间来临时，服务器就会自动从数据库中删除这个键。
+
+
+```python
+!redis-cli time
+```
+
+    1) "1540428171"
+    2) "341256"
+
+
+
+```python
+!redis-cli set key2 value 
+!redis-cli expireat key2 1540428197
+!redis-cli get key2  
+!redis-cli ttl key2  
+!redis-cli pttl key2  
+```
+
+    OK
+    (integer) 1
+    "value"
+    (integer) 11
+    (integer) 10439
+
+
+
+```python
+!redis-cli ttl key2  
+!redis-cli pttl key2
+```
+
+    (integer) -2
+    (integer) -2
+
+
+
+```python
+!redis-cli time
+```
+
+    1) "1540428335"
+    2) "210648"
+
+
+
+```python
+!redis-cli set key3 value 
+!redis-cli pexpireat key3 1540428355000
+!redis-cli get key3  
+!redis-cli ttl key3  
+!redis-cli pttl key3  
+```
+
+    OK
+    (integer) 1
+    "value"
+    (integer) 13
+    (integer) 13233
+
+
+
+```python
+!redis-cli ttl key3  
+!redis-cli pttl key3
+```
+
+    (integer) 11
+    (integer) 11162
+
+
+### 设置过期时间
+
+Redis有四个不同的命令可以用于设置键的生存时间（键可以存在多久）或过期时间（键可以时候会被删除）
+
+- EXPIRE 键名key  秒数ttl  : 用于将键的生存时间设置为ttl秒 
+
+- PEXPIRE 键名key  毫秒数ttl : 用于将键的生存时间设置为ttl毫秒 
+
+- EXPIREAT 键名key  时间戳timestamp : 用于将键的过期时间设置为timestamp所指定的秒数时间戳
+
+- PEXPIREAT 键名key  时间戳timestamp : 用于将键的过期时间设置为timestamp所指定的毫秒数时间戳
+
+*注 实际上 EXPIRE 、PEXPIRE、EXPIREAT 三个命令都是用PEXPIREAT命令来实现的：无论客户端执行的是以上四个命令中的哪一个，经过转换后，最终的
+
+执行效果都和执行PEXPIREAT命令一样。
+
+### 移除过期时间
+
+PERSIST 命令可以移除一个键的过期时间
+
+
+```python
+!redis-cli EXPIRE key5 1000
+!redis-cli ttl key5 
+```
+
+    (integer) 1
+    (integer) 1000
+
+
+
+```python
+!redis-cli ttl key5 
+!redis-cli PERSIST key5 
+!redis-cli ttl key5 
+```
+
+    (integer) 987
+    (integer) 1
+    (integer) -1
+
+
+### Redis是如何判断一个键过期的呢？   
+
+在redis中维护了一个expires字典，里面保存了数据库中所有设置了过期时间的键的过期时间，称为过期字典。我们可以用ttl（time to live）命令去查
+
+看key的剩余生存秒数，也可以用pttl查看key的剩余生存毫秒数，过程即是拿着key去expires字典中获取到key的过期毫秒时间戳，
+
+再减去当前时间戳，即可得到key的剩余生存时间。
+
+    而判断key是否过期，也是通过过期字典来完成的：
+
+    ①首先检查给定键是否存在于过期字典中，若存在则取得键的过期时间
+
+    ②检查当前UNIX时间戳是否大于键的过期时间，如果是的话则键已过期，若否则未过期
+
+
+## 删除策略
+
+- 定时删除：在设置键的过期时间的同时，创建一个定时器，定时定时器在键的过期时间来临时，立即执行对键的删除操作。（主动删除策略）
+
+- 惰性删除：放任键过期不管，但是每次从键空间中获取键时，都检查取得的键是否过期，如果过期的话，就删除改键；如果没有过期，就返回该键。 （被动删除策略）
+
+- 定期删除：每隔一段时间，程序就对数据库进行一次检查，删除里面的过期键。至于要删除多少过期键，以及要检查多少个数据库，则由算法决定。 （主动删除策略）
+
+### 定时删除策略
+
+- 优点：定时删除策略对内存是友好的；通过使用定时器，定时删除策略可以保证过期键会尽快地被删除，并释放过期键所占用的内存 。
+
+- 缺点：它对CPU时间是最不友好的；在过期键比较多的情况下，删除过期键这一行为会占用相当一部分CPU时间，对服务器的响应时间和吞吐量造成影响。
+
+### 惰性删除策略
+
+- 优点： 惰性删除策略对CPU 时间来说是最友好的:程序只会在取出键时才对键进行过期检查，这可以保证删除过期键的操作只会在非做不可的情况下进行， 并且删除的目标仅限于当前处理的键，这个策略不会在删除其他无关的过期键上花费任何CPU时间。
+
+- 缺点：它对内存是最不友好的: 如果一个键已经过期，而这个键又仍然保留在数据库中，那么只要这个过期键不被删除，它所占用的内存就不会释放。
+
+### 定期删除策略
+
+- 定时删除占用太多CPU 时间，影响服务器的响应时间和吞吐量。
+
+- 惰性删除浪费太多内存，有内存泄漏的危险。
+
+定期删除策略是前两种策略的一种整合和折中。
+
+- 定期删除策略每隔一段时间执行一次删除过期键操作，并通过限制删除操作执行的时长和频率来减少删除操作对CPU 时间的影响。
+
+- 除此之外，通过定期删除过期键，定期删除策略有效地减少了因为过期键而带来的内存浪费。定期删除策略的难点是确定删除操作执行的时长和频率
+
+- 如果删除操作执行得太频繁，或者执行的时间太长，定期删除策略就会退化成定时删除策略，以至于将C P U 时间过多地消耗在删除过期键上面。
+
+- 如果删除操作执行得太少，或者执行的时间太短，定期删除策略又会和惰性删除策略一样，出现浪费内存的情况。
+
+因此，如果采用定期删除策略的话，服务器必须根据情况，合理地设置删除操作的执行时长和执行频率。
+
+### Redis的过期键删除策略
+
+redis服务器实际使用的是惰性删除和定期删除两种策略：通过配合使用这两种删除策略，服务器可很好的使用CPU的时间和避免浪费内存空间之间取得平衡。
+
+### 从库的过期策略
+
+从库不会进行过期扫描，从库对过期的处理是被动的。主库在 key 到期时，会在 AOF 文件里增加一条 del 指令，同步到所有的从库，从库通过执行这条 del 指令来删除过期的 key。
+
+因为指令同步是异步进行的，所以主库过期的 key 的 del 指令没有及时同步到从库的话，会出现主从数据的不一致，主库没有的数据在从库里还存在。
+
+## 淘汰策略
+
+当 Redis 内存超出物理内存限制时，内存的数据会开始和磁盘产生频繁的交换 (swap)。交换会让 Redis 的性能急剧下降，
+
+对于访问量比较频繁的 Redis 来说，这样龟速的存取效率基本上等于不可用。
+
+在生产环境中我们是不允许 Redis 出现交换行为的，为了限制最大使用内存，Redis 提供了配置参数 maxmemory 来限制内存超出期望大小。
+
+当实际内存超出 maxmemory 时，Redis 提供了几种可选策略 (maxmemory-policy) 来让用户自己决定该如何腾出新的空间以继续提供读写服务。
+
+
+
+- noeviction 不会继续服务写请求 (DEL 请求可以继续服务)，读请求可以继续进行。
+
+  这样可以保证不会丢失数据，但是会让线上的业务不能持续进行。这是默认的淘汰策略。
+  
+
+- volatile-lru 尝试淘汰设置了过期时间的 key，最少使用的 key 优先被淘汰。
+
+  没有设置过期时间的 key 不会被淘汰，这样可以保证需要持久化的数据不会突然丢失。
+
+
+- volatile-ttl 跟上面一样，除了淘汰的策略不是 LRU，而是 key 的剩余寿命 ttl 的值，ttl 越小越优先被淘汰。
+
+
+- volatile-random 跟上面一样，不过淘汰的 key 是过期 key 集合中随机的 key。
+
+
+- allkeys-lru 区别于 volatile-lru，这个策略要淘汰的 key 对象是全体的 key 集合，而不只是过期的 key 集合。
+
+  这意味着没有设置过期时间的 key 也会被淘汰。
+  
+
+- allkeys-random 跟上面一样，不过淘汰的策略是随机的 key。
+
+## LRU （Least Recently Used）
+
+### LRU算法  (可自行深入研究)
+
+### LRU 近似算法
+
+## 懒惰删除
+
+删除指令 del 会直接释放对象的内存，大部分情况下，这个指令非常快，没有明显延迟。
+
+不过如果删除的 key 是一个非常大的对象，比如一个包含了千万元素的 hash，那么删除操作就会导致单线程卡顿。
+
+Redis 为了解决这个卡顿问题，在 4.0 版本引入了 unlink 指令，它能对删除操作进行懒处理，丢给后台线程来异步回收内存。
+
+
+```python
+!redis-cli set bigkey hello
+!redis-cli unlink bigkey
+```
+
+    OK
+    (integer) 1
+
+
+
+```python
+不是所有的 unlink 操作都会延后处理，如果对应 key 所占用的内存很小，延后处理就没有必要了，
+
+这时候 Redis 会将对应的 key 内存立即回收，跟 del 指令一样。
+```
+
+### 清空数据库
+
+Redis 提供了 flushdb 和 flushall 指令，用来清空数据库，这也是极其缓慢的操作。
+
+Redis 4.0 同样给这两个指令也带来了异步化，在指令后面增加 async 参数就可以将整棵大树连根拔起，扔给后台线程慢慢焚烧。
+
+ ### LFU (Least Frequently Used)
+
+Redis 的 LRU 模式，它可以有效的控制 Redis 占用内存大小，将冷数据从内存中淘汰出去。
+
+Antirez 在 Redis 4.0 里引入了一个新的淘汰策略 —— LFU 模式，作者认为它比 LRU 更加优秀。
+
+<span style="color:red">LFU 的全称是Least Frequently Used</span>，意为最不经常使用,表示按最近的访问频率进行淘汰，它比 LRU 更加精准地表示了一个 key 被访问的热度。
+
+
+如果一个 key 长时间不被访问，只是刚刚偶然被用户访问了一下，那么在使用 LRU 算法下它是不容易被淘汰的，因为 LRU 算法认为当前这个 key 是很热的。而 LFU 是需要追踪最近一段时间的访问频率，如果某个 key 只是偶然被访问一次是不足以变得很热的，它需要在近期一段时间内被访问很多次才有机会被认为很热。
+
+### 热点key发现
+
+
+    Redis 4.0 给淘汰策略配置参数maxmemory-policy增加了 2 个选项，分别是 volatile-lfu 和 allkeys-lfu，
+
+分别是对带过期时间的 key 进行 lfu 淘汰以及对所有的 key 执行 lfu 淘汰算法。
+
+
+    那么用户如何获取访问频率呢？redis提供了OBJECT FREQ子命令来获取LFU信息，
+
+但是要注意需要先把内存逐出策略设置为allkeys-lfu或者volatile-lfu，否则会返回错误。
+
+
+```python
+!redis-cli config get maxmemory-policy
+```
+
+    1) "maxmemory-policy"
+    2) "allkeys-lfu"
+
+
+### 相关最佳实践
+
+- 不要放垃圾数据，及时清理无用数据
+
+实验性的数据和下线的业务数据及时删除;
+
+- key尽量都设置过期时间
+
+对具有时效性的key设置过期时间，通过redis自身的过期key清理策略来降低过期key对于内存的占用，同时也能够减少业务的麻烦，不需要定期手动清理了.
+
+- 单Key不要过大
+
+这种key在get的时候网络传输延迟会比较大，需要分配的输出缓冲区也比较大，在定期清理的时候也容易造成比较高的延迟. 最好能通过业务拆分，数据压缩等方式避免这种过大的key的产生。
+
+- 不同业务如果公用一个业务的话，最好使用不同的逻辑db分开
+
+Redis的过期Key清理策略和强制淘汰策略都会遍历各个db。将key分布在不同的db有助于过期Key的及时清理。另外不同业务使用不同db也有助于问题排查和无用数据的及时下线.
+
